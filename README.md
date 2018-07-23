@@ -9,9 +9,13 @@ La web app permet :
 
 ## Screenshots
 
+### Fullscreen view
+
 ![alt text](https://github.com/LMKA/Solar-Potentials/blob/master/screenshots/fullscreen.PNG "Fullscreen screenshot of the web app")
 
 -----------------------------------------------------------------------------------------------------------------
+
+### Atom view
 
 ![alt text](https://github.com/LMKA/Solar-Potentials/blob/master/screenshots/onAtomEditor.PNG "Screenshot of the web app in Atom")
 
