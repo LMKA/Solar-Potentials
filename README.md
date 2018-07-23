@@ -9,9 +9,9 @@ La web app permet :
 
 ## Screenshots
 
-![Alt text](/screenshots/fullscreen.png?raw=true "Fullscreen screenshot of the web app")
+!["Fullscreen screenshot of the web app"](/screenshots/fullscreen.png)
 
 -----------------------------------------------------------------------------------------------------------------
 
-![Alt text](/screenshots/onAtomEditor.png?raw=true "Screenshot of the web app in Atom")
+!["Screenshot of the web app in Atom"](/screenshots/onAtomEditor.png)
 
