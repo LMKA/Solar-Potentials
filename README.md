@@ -13,5 +13,5 @@ La web app permet :
 
 -----------------------------------------------------------------------------------------------------------------
 
-![alt text](https://github.com/LMKA/Solar-Potentials/blob/master/screenshots/onAtomEditor.png "Screenshot of the web app in Atom")
+![alt text](https://github.com/LMKA/Solar-Potentials/blob/master/screenshots/onAtomEditor.PNG "Screenshot of the web app in Atom")
 
