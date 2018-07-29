@@ -7,19 +7,73 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0i4PbgUe8ePbuuYLV6Ieb192cZuVt-uo&libraries=drawing"></script>
     <style>
         #map {
-            height: 800px;
-            width: 100%;
+          height: 100%;
+        }
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        #floating-panel {
+          position: absolute;
+          top: 10px;
+          left: 25%;
+          z-index: 5;
+          background-color: #fff;
+          padding: 5px;
+          border: 1px solid #999;
+          text-align: center;
+          font-family: 'Roboto','sans-serif';
+          line-height: 30px;
+          padding-left: 10px;
+        }
+        html {
+            height: 100%
+        }
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #drop-container {
+          display: none;
+          height: 100%;
+          width: 100%;
+          position: absolute;
+          z-index: 1;
+          top: 0px;
+          left: 0px;
+          padding: 20px;
+          background-color: rgba(100, 100, 100, 0.5);
+        }
+        #drop-silhouette {
+          color: white;
+          border: white dashed 8px;
+          height: calc(100% - 56px);
+          width: calc(100% - 56px);
+          background-image: url('./ressources/drop_silouhaite.png');
+          background-repeat: no-repeat;
+          background-position: center;
         }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div id="drop-container"><div id="drop-silhouette"></div></div>
         <script type="text/typescript">
             class Map {
+                private _dropContainerDiv: HTMLDivElement = document.getElementById('drop-container');
+                private _dropsilhouetteDiv: HTMLDivElement = document.getElementById('drop-silhouette');
+                private _mapDiv: HTMLDivElement = document.getElementById('map');
                 private _map: google.maps.Map = null;
                 private _drawingManager: google.maps.drawing.DrawingManager = null;
+                private const _drawingShapesOptions = {
+                    strokeWeight: 0,
+                    fillOpacity: 0.45,
+                    editable: true
+                };
                 private const _filtersColor: string[] = ['white', 'red', 'orange', 'yellow', 'gray'];
-
 
                 // -- Accesseurs --][
                 public getMap(): google.maps.Map {
@@ -38,13 +92,12 @@
 
                 constructor () {
                     // Initialize the map
-                    this._map = new google.maps.Map(document.getElementById('map'), {
+                    this._map = new google.maps.Map(this._mapDiv, {
                                                         center: {lat: 6.065432, lng: 24.011209},
                                                         zoom: 4,
                                                         scaleControl: true,
                                                         streetViewControl: false
                                                 });
-
 
                     // Initialize the drawing manager
                     this._drawingManager = new google.maps.drawing.DrawingManager({
@@ -53,26 +106,10 @@
                                                     position: google.maps.ControlPosition.TOP_CENTER,
                                                     drawingModes: ['polyline', 'polygon', 'rectangle', 'circle']
                                                 },
-                                                polylineOptions: {
-                                                    strokeWeight: 0,
-                                                    fillOpacity: 0.45,
-                                                    editable: true
-                                                },
-                                                polygonOptions: {
-                                                    strokeWeight: 0,
-                                                    fillOpacity: 0.45,
-                                                    editable: true
-                                                },
-                                                rectangleOptions: {
-                                                    strokeWeight: 0,
-                                                    fillOpacity: 0.45,
-                                                    editable: true
-                                                },
-                                                circleOptions: {
-                                                    strokeWeight: 0,
-                                                    fillOpacity: 0.45,
-                                                    editable: true
-                                                },
+                                                polylineOptions: this._drawingShapesOptions,
+                                                polygonOptions: this._drawingShapesOptions,
+                                                rectangleOptions:this._drawingShapesOptions,
+                                                circleOptions: this._drawingShapesOptions,
                                                 map: this._map
                                             });
                 }
@@ -108,7 +145,6 @@
                 }
 
                 private addButtonControl(controlDiv, name: string, desc: string) {
-
                     // Getting the color
                     var color = this._filtersColor[controlDiv.index];
 
@@ -123,6 +159,7 @@
                     controlUI.style.cursor = 'pointer';
                     controlUI.style.textAlign = 'center';
                     controlUI.title = desc;
+                    // Append control UI div to the control div
                     controlDiv.appendChild(controlUI);
 
                     // Set CSS for the control text
@@ -134,6 +171,7 @@
                     controlText.style.paddingRight = '4px';
                     controlText.style.backgroundColor = color;
                     controlText.innerHTML = name;
+                    // Append control Text div to the control UI
                     controlUI.appendChild(controlText);
 
                     // Setup the click event listener on the buttons
@@ -141,11 +179,11 @@
                         switch (event.srcElement.id) {
                             case 'buttonControlyellow': {
                                 this._map.data.setStyle((feature) => {
-                                    return (feature.getProperty('ghi_kwh_m2') >= 2100) ? ({
+                                    return ((feature.getProperty('ghi_kwh_m2') >= 2100) ? ({
                                                                                             fillColor: color,
                                                                                             strokeColor: color,
                                                                                             strokeWeight: 0
-                                                                                        }) : ({visible: false});
+                                                                                        }) : ({visible: false}));
                                 });
                                 break;
                             }
@@ -155,17 +193,17 @@
                                                                                                 fillColor: color,
                                                                                                 strokeColor: color,
                                                                                                 strokeWeight: 0
-                                                                                            }) : ({visible: false});
+                                                                                            }) : ({visible: false}));
                                 });
                                 break;
                             }
                             case 'buttonControlred': {
                                 this._map.data.setStyle((feature) => {
-                                        return (feature.getProperty('ghi_kwh_m2') < 1900) ? ({
+                                        return ((feature.getProperty('ghi_kwh_m2') < 1900) ? ({
                                                                                                 fillColor: color,
                                                                                                 strokeColor: color,
                                                                                                 strokeWeight: 0
-                                                                                            }) : ({visible: false});
+                                                                                            }) : ({visible: false}));
                                 });
                                 break;
                             }
@@ -181,7 +219,7 @@
                     });
                 }
 
-                public initButtons () {
+                private initFiltersButtons() {
                     // Filter buttons
                     var filterButtonAll = document.createElement('div');
                     var filterButtonYellow = document.createElement('div');
@@ -208,36 +246,126 @@
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonHide);
                 }
 
-                private loadGeoJsonString(geoString) {
-                    var geojson =JSON.parse(geoString);
-                    this._map.data.addGeoJson(geojson);
-                    zoom(this._map);
+                /**
+                 * Update a map's viewport to fit each geometry in a dataset
+                 * @param {google.maps.Map} map The map to adjust
+                 */
+                private adjustZoomViewOnDatas(map: google.maps.Map) {
+                    var bounds = new google.maps.LatLngBounds();
+                    map.data.forEach((feature) => {
+                        this.processPoints(feature.getGeometry(), bounds.extend, bounds);
+                    });
+                    map.fitBounds(bounds);
+                }
+
+                /**
+                 * Process each point in a Geometry
+                 * @param {google.maps.Data.Geometry} geometry The structure to process
+                 * @param {function(google.maps.LatLng)} callback A function to call on each
+                 *                                                LatLng point encountered (e.g. Array.push)
+                 * @param {Object} thisArg The value of 'this' as provided to 'callback' (e.g.
+                 *                         myArray)
+                 */
+                private processPoints(geometry, callback, thisArg) {
+                    if(geometry instanceof google.maps.LatLng) {
+                        callback.call(thisArg, geometry);
+                    } else if (geometry instanceof google.maps.Data.Point) {
+                        callback.call(thisArg, geometry.get());
+                    } else {
+                        geometry.getArray().forEach((g) => {
+                            this.processPoints(g, callback, thisArg);
+                        });
+                    }
+                }
+
+                private showPanel(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    document.getElementById('drop-container').style.display = "block";
+                    return false;
+                }
+
+                private hidePanel(e) {
+                    document.getElementById('drop-container').style.display = "none";
+                }
+
+                private handleDrop(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    document.getElementById('drop-container').style.display = "none";
+
+                    var files = e.dataTransfer.files;
+
+                    if (files.length) {
+                        // process files being dropped and grab the file data from each of them
+                        for (var i = 0, file; file = files[i]; i++) {
+                            var reader = new FileReader();
+                            reader.onload = (e) => {
+                                loadGeoJsonString(e.target.result);
+                            };
+                            reader.onerror = (e) => {
+                                console.error('Reading failed !');
+                            };
+                            reader.readAsText(file);
+                        }
+                    } else {
+                        // process text or html content being dropped
+                        var plainText = e.dataTransfer.getData('text/plain');
+                        if (plainText) {
+                            loadGeoJsonString(plainText);
+                        }
+                    }
+
+                    // prevent drag event from bubbling further
+                    return false;
+                }
+
+                private initDragDrop() {
+                        // map specific events
+                        this._mapDiv.addEventListener('dragenter', this.showPanel, false);
+                        // overlay specific events (it only appears once drag starts)
+                        this._dropContainerDiv.addEventListener('dragover', this.showPanel, false);
+                        this._dropContainerDiv.addEventListener('drop', this.handleDrop, false);
+                        this._dropContainerDiv.addEventListener('dragleave', this.hidePanel, false);
+                }
+
+                public initListeners() {
+                    // Add the listners
+                    google.maps.event.addDomListener(window, 'init', this.initDragDrop());
+                    google.maps.event.addDomListener(window, 'load', this.initFiltersButtons());
+
                 }
 
                 public init() {
                     // Assign the drawing manager to the map
                     this._drawingManager.setMap(this._map);
 
-                    // Load GeoJson file
-                    this._map.data.loadGeoJson('./datas/data.geojson');
+                    // Init the filter buttons
+                    this.initListeners();
 
+                    // Comment the line bellow to start the web app without data
+                    this._map.data.loadGeoJson('./datas/data.geojson');
                     // Show datas with solar potential levels
                     this.showAllSolarPotentials();
-
-                    // Add the listners to our buttons
-                    google.maps.event.addDomListener(window, 'init', this.initButtons());
                 }
+            }
+
+            function loadGeoJsonString(geoString) {
+                var geojson =JSON.parse(geoString);
+                myMap.getMap().data.addGeoJson(geojson);
+                myMap.adjustZoomViewOnDatas(myMap.getMap());
             }
 
             // Creating an instance of Map
             var myMap: Map = new Map();
 
-            // Initilize the map
+            // Initilize the web app map
             myMap.init();
+
+
         </script>
-
-
-
 
     <script type="text/javascript" src="./scripts/ts_compiler/typescript.min.js"></script>
     <script type="text/javascript" src="./scripts/ts_compiler/typescript.compile.min.js"></script>
