@@ -18,7 +18,8 @@
             class Map {
                 private _map: google.maps.Map = null;
                 private _drawingManager: google.maps.drawing.DrawingManager = null;
-                private const _filtersColor: string[] = ['yellow', 'orange', 'red', 'white', 'gray'];
+                private const _filtersColor: string[] = ['white', 'red', 'orange', 'yellow', 'gray'];
+
 
                 // -- Accesseurs --][
                 public getMap(): google.maps.Map {
@@ -83,13 +84,13 @@
                         var solarPotential: number = feature.getProperty('ghi_kwh_m2');
 
                         if (solarPotential < 1900) {
-                            color = this._filtersColor[2];
-                        }
-                        if (solarPotential >= 1900 && solarPotential < 2100){
                             color = this._filtersColor[1];
                         }
+                        if (solarPotential >= 1900 && solarPotential < 2100){
+                            color = this._filtersColor[2];
+                        }
                         if (solarPotential >= 2100) {
-                            color = this._filtersColor[0];
+                            color = this._filtersColor[3];
                         }
 
                         return ({
@@ -106,7 +107,11 @@
                     });
                 }
 
-                private addButtonControl(controlDiv, color: string, name: string, desc: string) {
+                private addButtonControl(controlDiv, name: string, desc: string) {
+
+                    // Getting the color
+                    var color = this._filtersColor[controlDiv.index];
+
                     // Set CSS styles for the DIV containing the control
                     controlDiv.style.padding = '12px';
 
@@ -184,23 +189,29 @@
                     var filterButtonRed = document.createElement('div');
                     var filterButtonHide = document.createElement('div');
 
-                    filterButtonAll.index = 1;
-                    filterButtonRed.index = 2;
-                    filterButtonOrange.index = 3;
-                    filterButtonYellow.index = 4;
-                    filterButtonHide.index = 5;
+                    filterButtonAll.index = 0;
+                    filterButtonRed.index = 1;
+                    filterButtonOrange.index = 2;
+                    filterButtonYellow.index = 3;
+                    filterButtonHide.index = 4;
 
-                    this.addButtonControl(filterButtonAll, this._filtersColor[3], 'All SP (kwh/m²)', 'Click to show all solar potentials datas');
-                    this.addButtonControl(filterButtonRed, this._filtersColor[2], 'SP < 1900', 'Click to show only solar potentials under 1900');
-                    this.addButtonControl(filterButtonOrange, this._filtersColor[1], '1900 <= SP < 2100', 'Click to show only solar potentials between 1900 and 2100');
-                    this.addButtonControl(filterButtonYellow, this._filtersColor[0], 'SP >= 2100', 'Click to show only solar potentials over 2100');
-                    this.addButtonControl(filterButtonHide, this._filtersColor[4], 'Hide', 'Click to Hide all solar potentials datas');
+                    this.addButtonControl(filterButtonAll, 'All SP (kwh/m²)', 'Click to show all solar potentials datas');
+                    this.addButtonControl(filterButtonRed, 'SP < 1900', 'Click to show only solar potentials under 1900');
+                    this.addButtonControl(filterButtonOrange, '1900 <= SP < 2100', 'Click to show only solar potentials between 1900 and 2100');
+                    this.addButtonControl(filterButtonYellow, 'SP >= 2100', 'Click to show only solar potentials over 2100');
+                    this.addButtonControl(filterButtonHide, 'Hide', 'Click to Hide all solar potentials datas');
 
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonAll);
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonRed);
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonOrange);
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonYellow);
                     this._map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(filterButtonHide);
+                }
+
+                private loadGeoJsonString(geoString) {
+                    var geojson =JSON.parse(geoString);
+                    this._map.data.addGeoJson(geojson);
+                    zoom(this._map);
                 }
 
                 public init() {
@@ -214,7 +225,7 @@
                     this.showAllSolarPotentials();
 
                     // Add the listners to our buttons
-                    google.maps.event.addDomListener(window, 'load', this.initButtons());
+                    google.maps.event.addDomListener(window, 'init', this.initButtons());
                 }
             }
 
